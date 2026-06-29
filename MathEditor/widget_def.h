@@ -128,8 +128,8 @@ namespace widget { //Gestione oggetti widget
 	struct CoreLayout { //Pure layout 
 		Margin margin; //4 byte
 		Padding padding; //2 byte
-		uint8_t layoutOptions;
-		uint8_t w; //1 byte. Peso, ex. chi vince in arroganza per il layout. A pareggio si divide a metà, ma NON CERCARE di pareggiare
+		uint8_t layoutOptions = 0;
+		uint8_t w = 0; //1 byte. Peso, ex. chi vince in arroganza per il layout. A pareggio si divide a metà, ma NON CERCARE di pareggiare
 	};
 
 	struct AnimStatic {

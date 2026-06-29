@@ -6,4 +6,5 @@
 #include <iostream>
 #include "widgets.h"
 
-// TODO: Fare riferimento qui alle intestazioni aggiuntive richieste dal programma.
+
+void testing();

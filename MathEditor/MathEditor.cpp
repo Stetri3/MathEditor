@@ -12,6 +12,8 @@
 #include "text.h"
 #include "widgets.h"
 
+#define DEBUG_HEX(x) "0x" << std::hex << (x) << std::dec
+
 using namespace std;
 int main()
 {
@@ -54,14 +56,8 @@ int main()
 	SDL_StartTextInput(window);
 
 	//Spazio per cose init di debug (chiamate a funzioni sperimentali, inclusioni parziali ecc
-	constexpr uint32_t mask = ut::bit::getMask(1u << 2, 1u << 1);
-	std::cout << "Mask tra 1u << 2 e 1u << 1: " << mask << endl;
-	std::cout << "Valore di 3U secondo la mask sopra" << ut::bit::maskedToU(3u, mask) << std::endl;
-	widget::Canvas<100> canvas;
-	constexpr uint32_t handle = canvas.makeHandle(widget::WType::VLayout, widget::STATIC::RAW_REND, 2049u);
-	std::cout << "Handle: " << handle << ".\n";
-	static_assert(handle == 738723841u, "Erroreeeee");
-
+	testing();
+	
 	bool running = true;
 	SDL_Event event{};
 	while (running) {
@@ -91,4 +87,23 @@ int main()
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 	return 0;
+}
+
+void testing() {
+	constexpr uint32_t mask = ut::bit::getMask(1u << 2, 1u << 1);
+	std::cout << "Mask tra 1u << 2 e 1u << 1: " << endl;
+	std::cout << std::hex << mask << endl;
+	std::cout << "Valore di 3U secondo la mask sopra" << ut::bit::maskedToU(3u, mask) << std::endl;
+	widget::Canvas<100> canvas;
+	constexpr uint32_t handle = canvas.makeHandle(widget::WType(11u), 2u, 0u);
+	std::cout << "Handle: " << handle << ".\n";
+	namespace w = widget;
+	w::WidgetCoreInfo info;
+	info.type = w::WType::Button;
+	info.flags = w::STATIC::DRAWABLE;
+	info.size = w::RectSize{ 20, 100 };
+	w::WidgetCore core = canvas.newWidget(info);
+	ID::Indexing indexing = canvas.placeWidget(core, ID::NONE);
+	core = canvas.getBlock(canvas.fromHandle(core.handle));
+	std::cout << core.handle;
 }

@@ -13,6 +13,7 @@ namespace widget {
 		this->stack.reserve(blocknum);
 		this->exe_list_buffer.reserve(blocknum);
 		this->chronological.reserve(blocknum);
+		this->chronological.resize(blocknum);
 		std::cout << "Done.\n";
 		std::cout << "Indexing init...";
 			for (uint32_t i = 0; i < blocknum-1; ++i)
@@ -87,7 +88,7 @@ namespace widget {
 			if (!forceLoad) {
 				return num - loadedSize;
 			}
-			for (uint16_t i = 0; i < loadedSize; i+2)
+			for (uint16_t i = 0; i < loadedSize; i+=2)
 			{
 				//Sostituire con un dummy load di cores[i]
 			}
@@ -126,16 +127,19 @@ namespace widget {
 	}
 
 	template<uint32_t blocknum>
-	inline WidgetCore& Canvas<blocknum>::newWidget(WidgetCoreInfo widgetInfo)
+	inline WidgetCore Canvas<blocknum>::newWidget(WidgetCoreInfo widgetInfo)
 	{
-		if constexpr (widgetInfo.type == WType::VLayout) return WidgetCore();
+		//if (widgetInfo.type == WType::VLayout) return &WidgetCore();
 
-		Handle handle = this->makeHandle(widgetInfo.type, widgetInfo.flags, this->count);
 		WidgetCore wCore;
-		wCore.handle = handle;
-		wCore.layoutParams = widgetInfo.layoutOptions;
+		wCore.layoutParams.layoutOptions = widgetInfo.layoutOptions;
+		wCore.layoutParams.margin = widgetInfo.margin;
+		wCore.layoutParams.padding = widgetInfo.padding;
+		wCore.layoutParams.w = widgetInfo.weight;
 		wCore.logicFlags = widgetInfo.logicFlags;
 		wCore.size = widgetInfo.size;
+		Handle handle = this->makeHandle(widgetInfo.type, widgetInfo.flags, this->count);
+		wCore.handle = handle;
 		++count;
 		return wCore;
 	}
@@ -157,18 +161,18 @@ namespace widget {
 		}
 		ID::Id widgetID = next_free;
 		next_free = cores[next_free].indexing.nextBro;
-
-		WidgetCore& parentCore = cores[parent];
-		indexing.prevBro = parentCore.indexing.lastChild;
-		if (parentCore.indexing.firstChild == ID::NONE) {
-			parentCore.indexing.firstChild = widgetID;
+		if (parent != ID::NONE) {
+			WidgetCore& parentCore = cores[parent];
+			indexing.prevBro = parentCore.indexing.lastChild;
+			if (parentCore.indexing.firstChild == ID::NONE) {
+				parentCore.indexing.firstChild = widgetID;
+			}
+			else {
+				//Imposta l'ultimo lastChild a nextBro nuovo widget
+				cores[parentCore.indexing.lastChild].indexing.nextBro = widgetID;
+			}
+			parentCore.indexing.lastChild = widgetID;
 		}
-		else {
-			//Imposta l'ultimo lastChild a nextBro nuovo widget
-			cores[parentCore.indexing.lastChild].indexing.nextBro = widgetID;
-		}
-		parentCore.indexing.lastChild = widgetID;
-
 		WidgetCore& retCore = cores[widgetID];
 		retCore = core;
 
@@ -178,14 +182,26 @@ namespace widget {
 		//E non disturba la logica effettiva con stati volatili
 		retCore.indexing = indexing;
 		this->exe_list_buffer.push_back(widgetID);
+		this->chronological[retCore.handle & 0x3FFFF] = widgetID;
 		//Ricordarsi prima dello sleep, per ultima cosa di fare l'update (updateExeList)
 		return indexing;
 	}
 
 	template<uint32_t blocknum>
-	inline std::pair<Handle, ID::Indexing> Canvas<blocknum>::newWidget(VirtualCoreInfo widgetInfo)
+	inline VirtualCore Canvas<blocknum>::newWidget(VirtualCoreInfo widgetInfo)
 	{
-		return std::pair<Handle, ID::Indexing>();
+		if constexpr (!(widget::getTypeFlags(widgetInfo.type) & TYPE::VIRTUAL)) return VirtualCore();
+		VirtualCore core;
+		core.logicFlags = widgetInfo.logicFlags;
+		core.layoutFlags = widgetInfo.layoutOptions;
+		core.sizeExt = widgetInfo.extSize;
+		core.sizeInt = widgetInfo.intSize;
+		core.posX = widgetInfo.xInit;
+		core.posY = widgetInfo.yInit;
+		Handle handle = this->makeHandle(widgetInfo.type, widgetInfo.flags, this->count);
+		core.handle = handle;
+		++count;
+		return core;
 	}
 
 	template<uint32_t blocknum>

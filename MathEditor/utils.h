@@ -4,6 +4,7 @@
 #include <vector>
 #include <SDL3/SDL_RECT.h>
 #include <bit>
+#include <array>
 
 constexpr bool AUTO = true; //Se implementare automaticamente la struttura default piuttosto che lasciare la logica all'user
 constexpr bool SAFE = true;
@@ -70,5 +71,21 @@ namespace ut {
 			static_assert(std::is_unsigned_v<T>, "Richiesto tipo unsigned");
 			return (value << std::countr_zero(mask)) & mask;
 		}
+	}
+	constexpr std::array<char, 19> printHex(uint64_t num) {
+		std::array<char, 19> buffer{};
+		const char* digits = "0123456789ABCDEF";
+
+		buffer[0] = '0';
+		buffer[1] = 'x';
+		buffer[18] = '\0';
+
+		// Riempie l'array partendo dal fondo
+		for (int i = 17; i >= 2; --i) {
+			buffer[i] = digits[num & 0xF];
+			num >>= 4;
+		}
+
+		return buffer;
 	}
 }

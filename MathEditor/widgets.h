@@ -84,11 +84,11 @@ namespace widget {
 
 		static constexpr Handle makeHandle(WType wType, STATIC::Flag stFlags, uint32_t count);
 		
-		WidgetCore& newWidget(WidgetCoreInfo widgetInfo);
+		WidgetCore newWidget(WidgetCoreInfo widgetInfo);
 
 		ID::Indexing placeWidget(const WidgetCore& core, ID::Id parent);
 
-		std::pair<Handle, ID::Indexing> newWidget(VirtualCoreInfo widgetInfo);
+		VirtualCore newWidget(VirtualCoreInfo widgetInfo);
 
 
 		WidgetCore& getBlock(ID::Id id);
