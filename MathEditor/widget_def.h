@@ -108,6 +108,7 @@ namespace widget { //Gestione oggetti widget
 	//Si noti come molte flag si sovrappongano in TYPE, LOGIC e STATIC.
 	//Questo è per permettere al manager di ottimizzare la gestione in più punti diversi del programma.
 
+
 	struct Padding {
 		uint8_t topBottom = 0;
 		uint8_t leftRight = 0;
@@ -155,6 +156,8 @@ namespace ID { //Gestione indicizzazione memoria
 namespace widget {
 	using Handle = uint32_t;
 
+	constexpr Handle BG_HANDLE = 0;
+
 	struct WidgetCore {//La vera struct (da inizializzare sempre staticamente) del widget
 		Handle handle = 0; //Handle unico del widget (codifica info sul widget stesso)
 		ID::Indexing indexing; //Struct per l'indexing, va sempre tenuta vicino all'inizio
@@ -184,6 +187,17 @@ namespace widget {
 	private:
 		VirtualCore() = default;
 		template <uint32_t blocknum> friend class Canvas;
+	};
+
+	struct BackgroundCore {
+		uint8_t pad[10];
+		ID::Id firstChild = ID::NONE;
+		ID::Id lastChild = ID::NONE;
+		RectSize size;
+		uint8_t pad2[4];
+		Padding padding;
+		LAYOUT::Option layoutOptions = 0;
+		uint8_t pad3[7];
 	};
 
 	//Check compile time per il reinterpret

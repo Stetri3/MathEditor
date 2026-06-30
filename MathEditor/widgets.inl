@@ -205,6 +205,13 @@ namespace widget {
 	}
 
 	template<uint32_t blocknum>
+	inline void Canvas<blocknum>::makeBackground()
+	{
+		WidgetCoreInfo bgInfo;
+		bgInfo.type = 
+	}
+
+	template<uint32_t blocknum>
 	inline WidgetCore& Canvas<blocknum>::getBlock(ID::Id id)
 	{
 		return cores[id];

@@ -90,6 +90,8 @@ namespace widget {
 
 		VirtualCore newWidget(VirtualCoreInfo widgetInfo);
 
+		void makeBackground();
+
 
 		WidgetCore& getBlock(ID::Id id);
 	};

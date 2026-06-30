@@ -8,7 +8,7 @@
 
 namespace widget {
 	enum class WType : std::uint8_t {
-		Widget = 0, //Has to default to inconstructible
+		Background = 0, //background
 		Layout = 1, //Widget container, usato per la manipolazione geometrica dei figli
 		DrawLayout = 2, //Layout disegnabile post construction
 		ClickDrawLayout = 3, //DrawLayout + opzione di click. Per ora, ClickLayout senza draw non esiste (quasi totalmente inutile)
@@ -33,7 +33,7 @@ namespace widget {
 		TYPE::Flag typeFlags = 0;
 	};
 	constexpr std::array<StaticProp, static_cast<size_t>(WType::Count)> TYPES{ {
-		{0},//Widget
+		{TYPE::CONTAINER | TYPE::DRAWABLE},//Widget
 		{TYPE::CONTAINER}, //Layout
 		{TYPE::CONTAINER | TYPE::DRAWABLE | TYPE::DRAW_POST}, //DrawLayout
 		{TYPE::CONTAINER | TYPE::DRAWABLE | TYPE::DRAW_POST | TYPE::CLICKABLE},
