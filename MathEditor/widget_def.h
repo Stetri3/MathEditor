@@ -23,6 +23,8 @@ namespace Mem { //Spazio per gestione memoria stack
 
 	constexpr size_t EFF_BLOCKS = std::min(MAX_BLOCKS, CAP_BLOCKS); //Allocazione effettiva
 
+	
+
 }
 
 namespace widget { //Gestione oggetti widget
@@ -170,7 +172,7 @@ namespace widget {
 		uint8_t pad[4] = {0, 0, 0, 0};
 	private:
 		WidgetCore() = default;
-		template <uint32_t blocknum> friend class Canvas;
+		friend class Canvas;
 	};
 	
 	struct VirtualCore {
@@ -182,15 +184,16 @@ namespace widget {
 
 		RectSize sizeInt;
 		int16_t posX = 0; //La posizione virtuale del clipping in questo momento (x,y)
-		LAYOUT::Option layoutFlags; //Tenuto allo stesso offset che in WidgetCore
+		LAYOUT::Option layoutFlags = 0; //Tenuto allo stesso offset che in WidgetCore
 		int16_t posY = 0;
 	private:
 		VirtualCore() = default;
-		template <uint32_t blocknum> friend class Canvas;
+		friend class Canvas;
 	};
 
 	struct BackgroundCore {
-		uint8_t pad[10];
+		const Handle handle = BG_HANDLE;
+		uint8_t pad[6];
 		ID::Id firstChild = ID::NONE;
 		ID::Id lastChild = ID::NONE;
 		RectSize size;
@@ -212,4 +215,10 @@ namespace widget {
 		static_assert(sizeof(widget::WidgetCore) <= 32, "Il widget ha superato i 32 byte strategici!");
 	}
 
+	struct GeoCore {
+		int16_t x;
+		int16_t y;
+		uint16_t w;
+		uint16_t h;
+	};
 }

@@ -94,8 +94,8 @@ void testing() {
 	std::cout << "Mask tra 1u << 2 e 1u << 1: " << endl;
 	std::cout << std::hex << mask << endl;
 	std::cout << "Valore di 3U secondo la mask sopra" << ut::bit::maskedToU(3u, mask) << std::endl;
-	widget::Canvas<100> canvas;
-	constexpr uint32_t handle = canvas.makeHandle(widget::WType(11u), 2u, 0u);
+	widget::Canvas canvas;
+	constexpr uint32_t handle = widget::Canvas::makeHandle(widget::WType(11u), 2u, 0u);
 	std::cout << "Handle: " << handle << ".\n";
 	namespace w = widget;
 	w::WidgetCoreInfo info;
@@ -105,5 +105,7 @@ void testing() {
 	w::WidgetCore core = canvas.newWidget(info);
 	ID::Indexing indexing = canvas.placeWidget(core, ID::NONE);
 	core = canvas.getBlock(canvas.fromHandle(core.handle));
-	std::cout << core.handle;
+	canvas.makeBackground();
+	w::WidgetCore bg = canvas.getBlock(0);
+	std::cout << "Cose di background" << bg.handle;
 }

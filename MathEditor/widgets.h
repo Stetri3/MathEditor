@@ -10,9 +10,17 @@
 
 
 namespace widget {
+#ifndef MAX_BLOCKS
+	#define MAX_BLOCKS Mem::EFF_BLOCKS
+	#define IS_MAX_BLOCKS_SET false
+#else
+#define IS_MAX_BLOCKS_SET true
+#endif
+	static_assert((+(MAX_BLOCKS) >= 0), "Errore, macro MAX_BLOCKS non convertibile in uint");
+
 	
 	
-	template <uint32_t blocknum> class Canvas;
+	class Canvas;
 
 	
 
@@ -43,12 +51,27 @@ namespace widget {
 	//Geometry class. Questa NON può effettuare richieste, è l'engine che fa da bridge tra spazio visivo e spazio logico
 	//Non dovrebbe avere ownership se non di variabili interne , e in passati solo in const ref
 	class Geometry {
+		friend class Canvas;
+		template <uint8_t maxSize>
+		using WidgetArr = ut::static_vector<WidgetCore, maxSize>;
+		inline static std::vector<widget::GeoCore> visualArr; //Array di rettangoli visivi
+		//array di handle ordinata SEMPRE come visualArr
+		inline static std::vector<widget::Handle> orderedHandles;
+		Geometry() = delete;
 
+		template <uint32_t blocknum>
+		static void init();
+		static const std::vector<widget::GeoCore>& getVisual() { return visualArr; }
+		template <uint8_t out_size>
+		static inline ut::static_vector<GeoCore, out_size> parseCLayout(const ut::static_vector<WidgetCore, 64>& members); //Parse container layout
+
+		static void update(const std::vector<WidgetCore>& cores, const std::vector<ID::Id> exe_list);
 	};
 
 	//Manager class
-	template <uint32_t blocknum = Mem::EFF_BLOCKS>
 	class Canvas {
+	public:
+		static constexpr uint32_t blocknum = MAX_BLOCKS;
 	private:
 		//Riservare lo spazio per widgeting
 		std::vector<ID::Id> flat_exe_list; //Ordine di esecuzione
@@ -90,6 +113,7 @@ namespace widget {
 
 		VirtualCore newWidget(VirtualCoreInfo widgetInfo);
 
+		template <uint8_t oldCase = 0>
 		void makeBackground();
 
 
@@ -99,4 +123,5 @@ namespace widget {
 	//Da lasciare alla fine, def per la creazione dei widget da parte dell'user
 	//constexpr WidgetInfo makeWidget(); (ancora da fare)
 }
+#include "widgets_g.inl"
 #include "widgets.inl"
