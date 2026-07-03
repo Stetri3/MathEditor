@@ -5,11 +5,11 @@ namespace widget {
 		visualArr.reserve(blocknum);
 		orderedHandles.reserve(blocknum);
 	}
-	template<uint8_t out_size>
-	static inline ut::static_vector<GeoCore, out_size> widget::Geometry::parseCLayout(const WidgetArr<64u>& members)
+
+	inline GeoArr<64> Geometry::parseContainer(const WidgetArr<64u>& members, std::span<GeoCore> evaluated)
 	{
 		//DA FARE QUIIIIIII
 
-		return std::array<GeoCore, 2 ^ size_bin>();
+		
 	}
 }

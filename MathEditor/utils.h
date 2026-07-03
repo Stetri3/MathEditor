@@ -98,7 +98,7 @@ namespace ut {
             }
             T* space = data_ptr() + m_size;
             ::new (static_cast<void*>(space)) T(std::forward<Args>(args)...);
-            return m_data_ptr()[m_size++];
+            return data_ptr()[m_size++];
         }
 
         void push_back(const T& value) { emplace_back(value); }

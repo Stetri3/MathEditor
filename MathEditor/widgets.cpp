@@ -178,23 +178,29 @@ namespace widget {
 		visualArr.clear();
 		orderedHandles.clear();
 		//Passaggio bottom up
-		WidgetArr<64u> broBuffer; //64 fratelli max, 64*32 = 2 KB
+		ut::static_vector<WidgetCore, 64u> broBuffer; //64 fratelli max, 64*32 = 2 KB
 		ut::static_vector<Handle, 64u> handleBuffer;
+		GeoArr<64u> evaluatedBuffer;
 		ID::Id lastParent = 65534; //2nd to last id, riservato
+		ID::Id currParent;
 		for (uint32_t i = exe_list.size(); i < 65536u; --i)
 		{
 			const WidgetCore& core = cores[exe_list[i]];
 			broBuffer.push_back(core);
 			handleBuffer.push_back(core.handle);
-
-			if (cores[exe_list[i]].indexing.parent != lastParent) {
-				//cambiato parent, quindi dato che exe_list è ordinata top down l'ultimo era il parent degli altri
-				ut::static_vector<GeoCore, 64> parsedElements = parseCLayout<64u>(broBuffer);
-				visualArr.emplace_back(parsedElements.data());
-				orderedHandles.emplace_back(handleBuffer.data());
+			currParent = cores[exe_list[i]].indexing.parent;
+			if (currParent != lastParent) {
+				if (lastParent == 0) {
+					//Allora erano di primo livello
+				}
+				else {
+					//cambiato parent, quindi dato che exe_list è ordinata top down l'ultimo era il parent degli altri
+					GeoArr<64u> parsedElements = parseContainer(broBuffer, evaluatedBuffer);
+				}
 			}
 			else {
-				lastParent = cores[exe_list[i]].indexing.parent;
+				//Siamo ancora fratelli, continua con l'iter
+				lastParent = currParent;
 			}
 
 		}

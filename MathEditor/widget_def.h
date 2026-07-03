@@ -214,8 +214,16 @@ namespace widget {
 		static_assert(sizeof(widget::WidgetCore) == sizeof(widget::VirtualCore), "Le due struct hanno dimensioni diverse!");
 		static_assert(sizeof(widget::WidgetCore) <= 32, "Il widget ha superato i 32 byte strategici!");
 	}
-
+	namespace geometry {
+		struct GeoRequest {
+			uint16_t stretch_x;
+			uint16_t stretch_y;
+			int16_t mov_x;
+			int16_t mov_y;
+		};
+	}
 	struct GeoCore {
+		geometry::GeoRequest request;
 		int16_t x;
 		int16_t y;
 		uint16_t w;
