@@ -52,10 +52,6 @@ namespace widget {
 	//Geometry class. Questa NON può effettuare richieste, è l'engine che fa da bridge tra spazio visivo e spazio logico
 	//Non dovrebbe avere ownership se non di variabili interne , e in passati solo in const ref
 
-	template <uint8_t maxSize>
-	using GeoArr = ut::static_vector<GeoCore, maxSize>;
-	template <uint8_t maxSize>
-	using WidgetArr = ut::static_vector<WidgetCore, maxSize>;
 
 	class Geometry {
 		friend class Canvas;
@@ -68,8 +64,6 @@ namespace widget {
 		template <uint32_t blocknum>
 		static void init();
 		static const std::vector<widget::GeoCore>& getVisual() { return visualArr; }
-
-		static inline GeoArr<64u> parseContainer(const WidgetArr<64>& members, std::span<GeoCore> evaluated); //Parse container layout
 
 		static void update(const std::vector<WidgetCore>& cores, const std::vector<ID::Id> exe_list);
 	};

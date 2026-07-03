@@ -1,9 +1,10 @@
 #include "widgets.h"
+#include <cstring>
 
 namespace widget {
 	Canvas::Canvas()
 	{
-		std::cout << "Reserving RAM (" << (blocknum * sizeof(WidgetCore) * 5) / 1024 << ") KB... ";
+		std::cout << "Reserving RAM: (" << (blocknum * (sizeof(WidgetCore)  + sizeof(ID::Id)*5)) / 1024 << ") KB... ";
 		this->cores.resize(blocknum, WidgetCore{});
 		this->flat_exe_list.reserve(blocknum);
 		this->stack.reserve(blocknum);
@@ -175,35 +176,104 @@ namespace widget {
 	}
 	void Geometry::update(const std::vector<WidgetCore>& cores, const std::vector<ID::Id> exe_list)
 	{
-		visualArr.clear();
+		//Inizializza l'arr a tutti 0
+		std::memset(visualArr.data(), 0, visualArr.size() * sizeof(GeoCore));
+
 		orderedHandles.clear();
-		//Passaggio bottom up
-		ut::static_vector<WidgetCore, 64u> broBuffer; //64 fratelli max, 64*32 = 2 KB
-		ut::static_vector<Handle, 64u> handleBuffer;
-		GeoArr<64u> evaluatedBuffer;
-		ID::Id lastParent = 65534; //2nd to last id, riservato
-		ID::Id currParent;
-		for (uint32_t i = exe_list.size(); i < 65536u; --i)
+
+		//Passaggio bottom up: qui solo resizing
+		for (uint32_t j = exe_list.size() ; j > 0; --j)
 		{
-			const WidgetCore& core = cores[exe_list[i]];
-			broBuffer.push_back(core);
-			handleBuffer.push_back(core.handle);
-			currParent = cores[exe_list[i]].indexing.parent;
-			if (currParent != lastParent) {
-				if (lastParent == 0) {
-					//Allora erano di primo livello
-				}
-				else {
-					//cambiato parent, quindi dato che exe_list è ordinata top down l'ultimo era il parent degli altri
-					GeoArr<64u> parsedElements = parseContainer(broBuffer, evaluatedBuffer);
-				}
+			//Indice traslato (blabla)
+			const std::uint16_t i = static_cast<uint16_t>(j - 1);
+
+			const ID::Id curr = exe_list[i];
+			const WidgetCore& core = cores[curr];
+			const Handle currHandle = core.handle;
+			
+			//Ordina la lista secondo lo stesso ordine
+			orderedHandles.push_back(currHandle);
+			
+			//+= così in caso container non si perde l'accumulazione
+			visualArr[curr].h += core.size.h;
+			visualArr[curr].w += core.size.w;
+			
+			const ID::Id parent = core.indexing.parent;
+
+			//Se parent è root, questo era il ramo più alto, fine resizing qui
+			if (parent == ID::NONE) continue;
+
+			const WidgetCore& parentCore = cores[parent];
+
+			uint16_t total_w = visualArr[curr].w + core.layoutParams.margin.left + core.layoutParams.margin.right;
+			uint16_t total_h = visualArr[curr].h + core.layoutParams.margin.top + core.layoutParams.margin.bottom;
+
+			// 3. Accumula direttamente sul padre in base al tipo di layout del padre
+			if (parentCore.layoutParams.layoutOptions & LAYOUT::HORIZONTAL) {
+				visualArr[parent].w += total_w;                       // Somma sull'asse principale
+				visualArr[parent].h = std::max(visualArr[parent].h, total_h); // Massimo sull'asse cross
 			}
 			else {
-				//Siamo ancora fratelli, continua con l'iter
-				lastParent = currParent;
+				visualArr[parent].h += total_h;                       // Somma sull'asse principale
+				visualArr[parent].w = std::max(visualArr[parent].w, total_w); // Massimo sull'asse cross
 			}
-
 		}
-		//passaggio top down
+
+
+		//passaggio top down: posizionamento, stretching
+
+		//Dimensione BG = dimensione finestra
+		visualArr[0].h = cores[0].size.h;
+		visualArr[0].w = cores[0].size.w;
+
+		for (size_t i = 0; i < exe_list.size(); ++i) {
+			ID::Id curr = exe_list[i];
+			const WidgetCore& core = cores[curr];
+
+			// Se non è un container, non deve posizionare figli
+			if (!(getTypeFlagsFromHandle(core.handle) & TYPE::CONTAINER)) continue;
+
+			// Coord di partenza per i figli (considerando il padding del container)
+			int16_t start_x = visualArr[curr].x + core.layoutParams.padding.leftRight;
+			int16_t start_y = visualArr[curr].y + core.layoutParams.padding.topBottom;
+
+			// [Opzionale] Qui puoi calcolare lo spazio extra avanzato nel container 
+			// se visualArr[curr].w > dimensione_minima_calcolata_al_punto_1 per allineamenti CENTER/END/SPACED
+
+			ID::Id child = core.indexing.firstChild;
+			while (child != ID::NONE) {
+				const WidgetCore& childCore = cores[child];
+
+				// --- GESTIONE STRETCH (Cross-Axis) ---
+				// Se il container corrente (curr) è HORIZONTAL, l'asse cross è l'altezza (Y)
+				if (core.layoutParams.layoutOptions & LAYOUT::HORIZONTAL) {
+					if ((core.layoutParams.layoutOptions & LAYOUT::CROSS_MASK) == LAYOUT::CROSS_STRETCH) {
+						// Forza l'altezza del figlio pari all'altezza interna del parent
+						visualArr[child].h = visualArr[curr].h - (core.layoutParams.padding.topBottom * 2);
+					}
+
+					// Posiziona sull'asse Main (X) avanzandoci di volta in volta
+					visualArr[child].x = start_x + childCore.layoutParams.margin.left;
+					visualArr[child].y = start_y + childCore.layoutParams.margin.top; // (gestisci cross-align qui)
+
+					start_x += visualArr[child].w + childCore.layoutParams.margin.left + childCore.layoutParams.margin.right;
+				}
+				// Se il container è VERTICAL, l'asse cross è la larghezza (X)
+				else {
+					if ((core.layoutParams.layoutOptions & LAYOUT::CROSS_MASK) == LAYOUT::CROSS_STRETCH) {
+						// Forza la larghezza del figlio pari alla larghezza interna del parent
+						visualArr[child].w = visualArr[curr].w - (core.layoutParams.padding.leftRight * 2);
+					}
+
+					visualArr[child].x = start_x + childCore.layoutParams.margin.left; // (gestisci cross-align hier)
+					visualArr[child].y = start_y + childCore.layoutParams.margin.top;
+
+					start_y += visualArr[child].h + childCore.layoutParams.margin.top + childCore.layoutParams.margin.bottom;
+				}
+
+				child = cores[child].indexing.nextBro;
+			}
+		}
+
 	}
 }

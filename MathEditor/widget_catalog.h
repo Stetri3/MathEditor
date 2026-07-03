@@ -33,7 +33,7 @@ namespace widget {
 		TYPE::Flag typeFlags = 0;
 	};
 	constexpr std::array<StaticProp, static_cast<size_t>(WType::Count)> TYPES{ {
-		{TYPE::CONTAINER | TYPE::DRAWABLE},//Widget
+		{TYPE::CONTAINER | TYPE::DRAWABLE},//Background
 		{TYPE::CONTAINER}, //Layout
 		{TYPE::CONTAINER | TYPE::DRAWABLE | TYPE::DRAW_POST}, //DrawLayout
 		{TYPE::CONTAINER | TYPE::DRAWABLE | TYPE::DRAW_POST | TYPE::CLICKABLE},
