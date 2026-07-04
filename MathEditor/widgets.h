@@ -11,13 +11,6 @@
 
 
 namespace widget {
-#ifndef MAX_BLOCKS
-	#define MAX_BLOCKS Mem::EFF_BLOCKS
-	#define IS_MAX_BLOCKS_SET false
-#else
-#define IS_MAX_BLOCKS_SET true
-#endif
-	static_assert((+(MAX_BLOCKS) >= 0), "Errore, macro MAX_BLOCKS non convertibile in uint");
 
 	
 	
@@ -55,6 +48,10 @@ namespace widget {
 
 	class Geometry {
 		friend class Canvas;
+#ifdef _DEBUG
+		friend class DebugHelper;
+		friend void ::testing();
+#endif 
 		
 		inline static std::vector<widget::GeoCore> visualArr; //Array di rettangoli visivi
 		//array di handle ordinata SEMPRE come visualArr
@@ -91,6 +88,7 @@ namespace widget {
 		//Numero di variabili create dall'inizio del programma
 		uint32_t count = 0;
 
+
 	public:
 
 		Canvas();
@@ -118,6 +116,12 @@ namespace widget {
 
 
 		WidgetCore& getBlock(ID::Id id);
+
+#ifdef _DEBUG
+		friend class DebugHelper;
+		friend void ::testing();
+#endif 
+
 	};
 
 	//Da lasciare alla fine, def per la creazione dei widget da parte dell'user

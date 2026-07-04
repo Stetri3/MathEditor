@@ -6,7 +6,8 @@
 //Da includere come prima cosa in ogni altro header widget
 
 //!Ricordarsi di tenere un alignment congruo, evitare padding il più possibile
-
+class DebugHelper;
+void testing();
 namespace Mem { //Spazio per gestione memoria stack
 
 	constexpr uint8_t ALIGNMENT = 32;
@@ -26,6 +27,13 @@ namespace Mem { //Spazio per gestione memoria stack
 	
 
 }
+#ifndef MAX_BLOCKS
+#define MAX_BLOCKS 200u
+#define IS_MAX_BLOCKS_SET false
+#else
+#define IS_MAX_BLOCKS_SET true
+#endif
+static_assert((+(MAX_BLOCKS) >= 0), "Errore, macro MAX_BLOCKS non convertibile in uint");
 
 namespace widget { //Gestione oggetti widget
 
@@ -173,6 +181,10 @@ namespace widget {
 	private:
 		WidgetCore() = default;
 		friend class Canvas;
+
+		//per il debug
+		friend class DebugHelper;
+
 	};
 	
 	struct VirtualCore {

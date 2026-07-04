@@ -193,7 +193,7 @@ namespace widget {
 			
 			//Ordina la lista secondo lo stesso ordine
 			orderedHandles.push_back(currHandle);
-			
+			if (i == 0) break;
 			//+= così in caso container non si perde l'accumulazione
 			visualArr[curr].h += core.size.h;
 			visualArr[curr].w += core.size.w;

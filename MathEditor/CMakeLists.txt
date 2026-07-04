@@ -10,7 +10,7 @@ add_executable (MathEditor "MathEditor.cpp"
 "text.cpp" "widgets.h"
 "widgets.inl" "widget_catalog.h"
 "widget_def.h" "widgets.cpp"
-"widgets_g.inl" "utils/file_utils.hpp")
+"widgets_g.inl" "utils/file_utils.hpp" "widget/debug_load.h" "widget/debug_load.cpp")
 set_property(TARGET MathEditor PROPERTY CXX_STANDARD_REQUIRED ON)
 set_property(TARGET MathEditor PROPERTY CXX_STANDARD 20)
 set_source_files_properties(widgets.inl PROPERTIES HEADER_FILE_ONLY TRUE)

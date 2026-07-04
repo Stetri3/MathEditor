@@ -44,7 +44,9 @@ namespace widget {
 				bgCore.lastChild = oldCore.lastChild;
 			}
 		}
-
+		if (this->next_free == 0) {
+			next_free = cores[0].indexing.nextBro;
+		}
 		cores[0] = std::bit_cast<WidgetCore, BackgroundCore>(bgCore);
 
 	}
