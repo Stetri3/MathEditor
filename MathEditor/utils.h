@@ -173,6 +173,7 @@ namespace ut {
 			return (value & mask) >> std::countr_zero(mask);
 		}
 
+#define M2U(v, m) (::ut::bit::maskedToU((v), (m)))
 		/**
 		* @brief Impacchetta il numero in una maschera contigua
 		* @tparam T Deve essere un tipo intero senza segno (uint8_t, uint32_t, ecc.)
@@ -186,6 +187,14 @@ namespace ut {
 			static_assert(std::is_unsigned_v<T>, "Richiesto tipo unsigned");
 			return (value << std::countr_zero(mask)) & mask;
 		}
+
+
+        template <typename T>
+        constexpr bool checkMasked(T value, T mask, T toCheck) noexcept {
+            static_assert(std::is_unsigned_v<T>, "Richiesto tipo unsigned");
+            return (maskedToU(value, mask) == toCheck);
+        }
+
 	}
 	constexpr std::array<char, 19> printHex(uint64_t num) {
 		std::array<char, 19> buffer{};

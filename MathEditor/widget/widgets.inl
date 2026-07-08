@@ -47,6 +47,8 @@ namespace widget {
 		if (this->next_free == 0) {
 			next_free = cores[0].indexing.nextBro;
 		}
+		bgCore.size = windowSize;
+		bgCore.layoutOptions = LAYOUT::CROSS_START | LAYOUT::ALIGN_START;
 		cores[0] = std::bit_cast<WidgetCore, BackgroundCore>(bgCore);
 
 	}
@@ -57,5 +59,9 @@ namespace widget {
 		return (static_cast<Handle>(wType) << 26) |
 			(static_cast<Handle>(stFlags) << 18) |
 			cutCount;
+	}
+
+	constexpr auto GeoCore::getRelative(bool is_hor) {
+		return is_hor ? GeoRel{ x, w, y, h } : GeoRel{ y, h, x, w };
 	}
 }

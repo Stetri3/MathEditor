@@ -1,5 +1,5 @@
 #pragma once
-
+#include "config.h"
 #include <cstddef>
 //File di definizioni per tipi usati
 //Include variabili globali e constexpr generiche
@@ -8,6 +8,12 @@
 //!Ricordarsi di tenere un alignment congruo, evitare padding il più possibile
 class DebugHelper;
 void testing();
+#ifndef _SAFE
+#define _SAFE false
+#endif // !SAFE
+
+
+
 namespace Mem { //Spazio per gestione memoria stack
 
 	constexpr uint8_t ALIGNMENT = 32;
@@ -44,29 +50,27 @@ namespace widget { //Gestione oggetti widget
 	namespace LAYOUT {
 		using Option = uint8_t;
 		constexpr Option NONE = 0;
-		constexpr Option HAS_REFIN = 1 << 0; //Se ha i refinements di layout
-		//Costanti per aligning, se container
-		constexpr Option HORIZONTAL = 1 << 1; //Altrimenti vertical
-		constexpr Option ALIGN_MASK = 3 << 2;
-		constexpr Option ALIGN_START = 0 << 2; //Significa top in vertical
-		constexpr Option ALIGN_CENTER = 1 << 2;
-		constexpr Option ALIGN_END = 2 << 2; //Bottom in vertical
-		constexpr Option ALIGN_SPACED = 3 << 2; //Spazio diviso equamente
-		constexpr Option CROSS_MASK = 3 << 4; //Mask per allineamento in direzione perpendicolare
-		constexpr Option CROSS_START = 0 << 4;
-		constexpr Option CROSS_CENTER = 1 << 4;
-		constexpr Option CROSS_END = 2 << 4;
-		constexpr Option CROSS_STRETCH = 3 << 4;
+		constexpr Option HORIZONTAL = 1 << 0; //Altrimenti vertical
+		constexpr Option ALIGN_MASK = 3 << 1;
+		constexpr Option ALIGN_START = 0 << 1; //Significa top in vertical
+		constexpr Option ALIGN_CENTER = 1 << 1;
+		constexpr Option ALIGN_END = 2 << 1; //Bottom in vertical
+		constexpr Option ALIGN_SPACED = 3 << 1; //Spazio diviso equamente
+		constexpr Option CROSS_MASK = 3 << 3; //Mask per allineamento in direzione perpendicolare
+		constexpr Option CROSS_START = 0 << 3;
+		constexpr Option CROSS_CENTER = 1 << 3;
+		constexpr Option CROSS_END = 2 << 3;
+		constexpr Option CROSS_STRETCH = 3 << 3;
 		//Fine solo container
 		//Per leaf (widget non container)
-		constexpr Option STRETCH_MASK = 3 << 2; //Definisce dove posizionarsi se il parent ha CROSS_STRETCH e allarga più della size della leaf
-		constexpr Option STRETCH_START = 0 << 2; //Se non ha cross dimension massima, o NO_STRETCH, sta nel cross start
-		constexpr Option STRETCH_CENTER = 1 << 2; //Come sopra ... center
-		constexpr Option STRETCH_END = 2 << 2; //Come sopra ... end
-		constexpr Option STRETCH_FILL = 3 << 2; //Per ora vale come start, non voglio implementare dimensione leaf variabile
-		constexpr Option NO_STRETCH = 1 << 4; //Se non stretcha il parent quando quello ha cross stretch
+		// ???
 		//Fine solo leaf
-		constexpr Option HAS_ANIMATION = 1 << 6; //Se ha un'animazione statica (ovvero numero finito di texture)
+		constexpr Option STRETCH_MASK = 3 << 5; //Definisce dove posizionarsi se il parent ha CROSS_STRETCH e allarga più della size della leaf
+		constexpr Option STRETCH_START = 0 << 5; //Se non ha cross dimension massima, o NO_STRETCH, sta nel cross start
+		constexpr Option STRETCH_CENTER = 1 << 5; //Come sopra ... center
+		constexpr Option STRETCH_END = 2 << 5; //Come sopra ... end
+		constexpr Option STRETCH_FILL = 3 << 5; //Per ora vale come start, non voglio implementare dimensione leaf variabile
+		constexpr Option NO_STRETCH = 1 << 7; //Se non stretcha il parent quando quello ha cross stretch
 		
 	}
 	namespace LOGIC {
@@ -82,7 +86,14 @@ namespace widget { //Gestione oggetti widget
 		constexpr Flag ONCLICK = 1 << 5; //Se esiste onClick per questo widget. OnClick è speciale, per cui utile usarlo dedicato
 		constexpr Flag IMMOVABLE = 1 << 6; //Se il widget è in uno stato in cui non può essere spostato (es. linking async)
 		//Nota: in generale, anche se è una possibilità, è bad practice usarlo per passare raw pointer async, meglio usare sempre canvas come interfaccia
-		
+		constexpr Flag RESIZE_MASK = 3 << 7;
+		constexpr Flag RESIZE_NONE = 0 << 7;
+		constexpr Flag RESIZE_FREE = 1 << 7;
+		constexpr Flag RESIZE_PROP = 2 << 7;
+		constexpr Flag RESIZE_CUSTOM = 3 << 7;
+		constexpr Flag RESIZE_GEOMETRY = 1 << 9; //Se chiama resize quando è deformato nel layouting
+		constexpr Flag CHILD_DEFAULT_WEIGHTS = 1 << 10; //ATTENZIONE: SOLO SUGGERIMENTO (per geometry),
+		//usarlo se i child variano in weight non rovina il programma ma peggiora le performance
 	}
 
 	namespace TYPE {
@@ -133,8 +144,12 @@ namespace widget { //Gestione oggetti widget
 	struct RectSize{//Semplice struct per size
 		uint16_t w = 0;
 		uint16_t h = 0;
-	};
 
+		//Per l'accesso tramite bool is_horizontal
+		using Ptr = uint16_t RectSize::*;
+		static inline Ptr main[2] = { &RectSize::h, &RectSize::w };
+		static inline Ptr cross[2] = { &RectSize::w, &RectSize::h };
+	};
 
 	struct CoreLayout { //Pure layout 
 		Margin margin; //4 byte
@@ -161,6 +176,8 @@ namespace ID { //Gestione indicizzazione memoria
 		Id firstChild = NONE;
 		Id lastChild = NONE;
 	};
+
+	using RenderId = uint16_t;
 }
 
 namespace widget {
@@ -178,10 +195,11 @@ namespace widget {
 		CoreLayout layoutParams;
 		//Renderla inistanziabile dall'esterno (per istanziarla correttamente solo da canvas)
 		uint8_t pad[4] = {0, 0, 0, 0};
+		void resize(RectSize maxSize);
+		void staticResize(RectSize maxSize); //resize implicito, no logica associata
 	private:
 		WidgetCore() = default;
 		friend class Canvas;
-
 		//per il debug
 		friend class DebugHelper;
 
@@ -208,11 +226,12 @@ namespace widget {
 		uint8_t pad[6];
 		ID::Id firstChild = ID::NONE;
 		ID::Id lastChild = ID::NONE;
+		uint8_t pad2[2];
 		RectSize size;
-		uint8_t pad2[4];
+		uint8_t pad3[4];
 		Padding padding;
 		LAYOUT::Option layoutOptions = 0;
-		uint8_t pad3[7];
+		uint8_t pad4[5];
 	};
 
 	//Check compile time per il reinterpret
@@ -225,6 +244,7 @@ namespace widget {
 			"CRITICAL: layoutOptions e layoutFlags non sono allineati in memoria!");
 		static_assert(sizeof(widget::WidgetCore) == sizeof(widget::VirtualCore), "Le due struct hanno dimensioni diverse!");
 		static_assert(sizeof(widget::WidgetCore) <= 32, "Il widget ha superato i 32 byte strategici!");
+
 	}
 	namespace geometry {
 		struct GeoRequest {
@@ -234,11 +254,50 @@ namespace widget {
 			int16_t mov_y;
 		};
 	}
+
+	struct GeoRel {
+		int16_t mPos;
+		uint16_t mDim;
+		int16_t cPos;
+		uint16_t cDim;
+	};
 	struct GeoCore {
-		geometry::GeoRequest request;
 		int16_t x;
 		int16_t y;
 		uint16_t w;
 		uint16_t h;
+
+
+		//0 memoria, per evitare branching esterno
+		using PosPtr = int16_t GeoCore::*;
+		using DimPtr = uint16_t GeoCore::*;
+
+		static inline PosPtr mPos[2] = { &GeoCore::y, &GeoCore::x };
+		static inline PosPtr cPos[2] = { &GeoCore::x, &GeoCore::y };
+		static inline DimPtr mDim[2] = { &GeoCore::h, &GeoCore::w };
+		static inline DimPtr cDim[2] = { &GeoCore::w, &GeoCore::h };
+
+		constexpr auto getRelative(bool is_hor);
+	};
+
+	struct ColorCore {
+		union {
+			void* texturePtr; //Cambiare tipo in qualche texture type
+			struct {
+				uint32_t RGBA;
+				uint32_t method; //addizionali, da flag
+			}
+		};
+		uint16_t colorFlags;
+	};
+
+	struct RenderPacket {
+		Handle handle;
+		GeoCore geo; //Size/pos del layout
+		uint8_t pad[2];
+		LOGIC::Flag logicFlags;
+		RectSize size; //Size del drawing
+		uint8_t pad2[4];
+		Padding padding;
 	};
 }

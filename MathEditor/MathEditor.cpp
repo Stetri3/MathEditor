@@ -15,7 +15,7 @@
 #include "widget/debug_load.h"
 
 #define DEBUG_HEX(x) "0x" << std::hex << (x) << std::dec
-
+#define DEBUG
 using namespace std;
 int main()
 {
@@ -110,9 +110,12 @@ void testing() {
 	{
 		w::WidgetCore core = canvas.newWidget(it);
 		core.indexing = canvas.placeWidget(core, 0);
-		cores.push_back(std::move(core));
+		cores.push_back(core);
 	}
 	canvas.updateExeList();
 	w::Geometry::init<canvas.blocknum>();
-	w::Geometry::update(cores, canvas.flat_exe_list);
+	int ret = w::Geometry::update(DebugHelper::getCanvasCores(canvas), canvas.flat_exe_list);
+	DebugMessage("return di update: " << ret)
+	std::vector<w::GeoCore> visual = w::Geometry::getVisual();
+
 }

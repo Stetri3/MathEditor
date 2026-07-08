@@ -52,23 +52,31 @@ namespace widget {
 		friend class DebugHelper;
 		friend void ::testing();
 #endif 
-		
+		inline static struct WeightInfo {
+
+		};
 		inline static std::vector<widget::GeoCore> visualArr; //Array di rettangoli visivi
 		//array di handle ordinata SEMPRE come visualArr
 		inline static std::vector<widget::Handle> orderedHandles;
+
+		inline static std::vector<RectSize> idealSizes; //Array di grandezze "ideali", utile per processi interni
+		inline static std::vector<uint8_t> childCount;
+		inline static std::vector<uint8_t> weights;
+		inline static std::vector<WeightInfo> weightInfos;
 		Geometry() = delete;
 
 		template <uint32_t blocknum>
 		static void init();
 		static const std::vector<widget::GeoCore>& getVisual() { return visualArr; }
 
-		static void update(const std::vector<WidgetCore>& cores, const std::vector<ID::Id> exe_list);
+		static int update(const std::vector<WidgetCore>& cores, const std::vector<ID::Id> exe_list);
 	};
 
 	//Manager class
 	class Canvas {
 	public:
 		static constexpr uint32_t blocknum = MAX_BLOCKS;
+		inline static Canvas* instance = nullptr;
 	private:
 		//Riservare lo spazio per widgeting
 		std::vector<ID::Id> flat_exe_list; //Ordine di esecuzione
@@ -88,11 +96,16 @@ namespace widget {
 		//Numero di variabili create dall'inizio del programma
 		uint32_t count = 0;
 
+		//Size della window
+		RectSize windowSize = { 1920, 1080 };
+
 
 	public:
 
 		Canvas();
 		void updateExeList();
+
+		void doResize(WidgetCore& core, RectSize maxSize);
 
 		template <typename Func, bool topdown = true>
 		void execute_branch(ID::Id node_id, Func& action);
@@ -118,7 +131,7 @@ namespace widget {
 		WidgetCore& getBlock(ID::Id id);
 
 #ifdef _DEBUG
-		friend class DebugHelper;
+		friend class ::DebugHelper;
 		friend void ::testing();
 #endif 
 

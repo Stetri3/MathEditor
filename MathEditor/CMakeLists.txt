@@ -7,14 +7,18 @@ add_executable (MathEditor "MathEditor.cpp"
 "MathEditor.h" "utils.h"
 "utils.cpp" "fonts.h"
 "fonts.cpp" "text.h"
-"text.cpp" "widgets.h"
-"widgets.inl" "widget_catalog.h"
-"widget_def.h" "widgets.cpp"
-"widgets_g.inl" "utils/file_utils.hpp" "widget/debug_load.h" "widget/debug_load.cpp")
+"text.cpp" "widget/widgets.h"
+"widget/widgets.inl" "widget/widget_catalog.h"
+"widget/widget_def.h" "widget/widgets.cpp"
+"widget/widgets_g.inl" "utils/file_utils.hpp"
+"utils/type_utils.hpp"
+"widget/debug_load.h" "widget/debug_load.cpp" "config.h" "rendering/render.h" "rendering/render.cpp" "rendering/render_def.h")
 set_property(TARGET MathEditor PROPERTY CXX_STANDARD_REQUIRED ON)
 set_property(TARGET MathEditor PROPERTY CXX_STANDARD 20)
 set_source_files_properties(widgets.inl PROPERTIES HEADER_FILE_ONLY TRUE)
 # TODO: Aggiungere i test e, se necessario, installare le destinazioni.
+
+target_precompile_headers(MathEditor PRIVATE config.h)
 
 set(LIBDIR "C:/Dev/Libs")
 set(SDL3_DIR "${LIBDIR}/sdl3_dist")

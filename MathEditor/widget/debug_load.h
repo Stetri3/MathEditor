@@ -102,5 +102,7 @@ public:
     }
     static void doCanvas();
 
+    static const std::vector<widget::WidgetCore>& getCanvasCores(widget::Canvas& canvas);
+
     static std::vector<widget::WidgetCoreInfo> generateDebugWidgetInfo();
 };

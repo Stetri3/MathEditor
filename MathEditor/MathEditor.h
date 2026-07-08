@@ -2,9 +2,9 @@
 // o file di inclusione specifici del progetto.
 
 #pragma once
-
 #include <iostream>
 #include "widgets.h"
+
 
 
 void testing();

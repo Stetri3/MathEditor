@@ -5,6 +5,13 @@ void DebugHelper::doCanvas()
 
 }
 
+const std::vector<widget::WidgetCore>& DebugHelper::getCanvasCores(widget::Canvas& canvas)
+{
+    return canvas.cores;
+}
+
+
+
 std::vector<widget::WidgetCoreInfo> DebugHelper::generateDebugWidgetInfo() {
     using namespace widget;
     std::vector<WidgetCoreInfo> test_vector;
@@ -29,7 +36,7 @@ std::vector<widget::WidgetCoreInfo> DebugHelper::generateDebugWidgetInfo() {
         w.type = widget::WType::Layout;
         w.flags = widget::STATIC::CUSTOM_LOGIC;
         w.logicFlags = widget::LOGIC::DRAWABLE | widget::LOGIC::CLICKABLE;
-        w.size = { 400, 1060 };
+        w.size = { 400, 200 };
         w.margin = { 5, 5, 5, 5 };
         w.padding = { 0, 0 };
         w.weight = 0;
@@ -43,7 +50,7 @@ std::vector<widget::WidgetCoreInfo> DebugHelper::generateDebugWidgetInfo() {
         w.type = widget::WType::TextField;
         w.flags = widget::STATIC::DRAWABLE | widget::STATIC::ROUNDED;
         w.logicFlags = widget::LOGIC::DRAWABLE | widget::LOGIC::CLICKABLE | widget::LOGIC::ONCLICK;
-        w.size = { 1480, 1060 };
+        w.size = { 1480, 800 };
         w.margin = { 5, 5, 5, 5 };
         w.padding = { 20, 20 };
         w.weight = 2;
