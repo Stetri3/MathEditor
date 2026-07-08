@@ -20,3 +20,4 @@ constexpr bool IS_DEBUG = false
 #endif
 
 constexpr bool _SAFE = false;
+

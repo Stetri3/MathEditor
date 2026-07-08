@@ -1,6 +1,7 @@
 #pragma once
-#include "config.h"
 #include <cstddef>
+#include "../config.h"
+#include "../rendering/render_def.h"
 //File di definizioni per tipi usati
 //Include variabili globali e constexpr generiche
 //Da includere come prima cosa in ogni altro header widget
@@ -190,7 +191,7 @@ namespace widget {
 		ID::Indexing indexing; //Struct per l'indexing, va sempre tenuta vicino all'inizio
 		LOGIC::Flag logicFlags = 1; //Flag della logica, variano a runtime, specificano lo stato logico del widget
 
-		RectSize size; //4 byte
+		RectSize size; //4 byte, size intrinseca
 
 		CoreLayout layoutParams;
 		//Renderla inistanziabile dall'esterno (per istanziarla correttamente solo da canvas)
@@ -262,9 +263,9 @@ namespace widget {
 		uint16_t cDim;
 	};
 	struct GeoCore {
-		int16_t x;
+		int16_t x; //pos. assolute (int solo per motivi di forward compatibility, per ora indifferente)
 		int16_t y;
-		uint16_t w;
+		uint16_t w; //dim. risultante da layout
 		uint16_t h;
 
 
@@ -280,23 +281,14 @@ namespace widget {
 		constexpr auto getRelative(bool is_hor);
 	};
 
-	struct ColorCore {
-		union {
-			void* texturePtr; //Cambiare tipo in qualche texture type
-			struct {
-				uint32_t RGBA;
-				uint32_t method; //addizionali, da flag
-			}
-		};
-		uint16_t colorFlags;
-	};
+	
 
 	struct RenderPacket {
 		Handle handle;
 		GeoCore geo; //Size/pos del layout
 		uint8_t pad[2];
 		LOGIC::Flag logicFlags;
-		RectSize size; //Size del drawing
+		RectSize size; //Size intrinseca del drawing
 		uint8_t pad2[4];
 		Padding padding;
 	};
