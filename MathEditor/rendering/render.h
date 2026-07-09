@@ -11,8 +11,10 @@ namespace render {
 
 		SDL_Renderer* renderer;
 		std::vector<ColorCore> background_colors; //Pool per colorCore, chiamato "background" per enfatizzare che si occupa solo delle statiche
-		std::vector<SDL_FRect> render_rects; //Parallelo a background_colors
+		std::vector<RenderPacket> packets; //I rendering vari
 	public:
 		Render(SDL_Window* window);
+
+		void Texturize(std::vector<RenderPacket>& packets);
 	};
 }

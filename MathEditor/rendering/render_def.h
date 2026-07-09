@@ -25,4 +25,17 @@ namespace render {
 				uint32_t dataId; //Alcune texture (es. text, image) supportano il retrieval di data da un'altra pool
 			};
 		};
+
+	struct RenderPacket {
+		uint32_t handle;
+		int16_t x;
+		int16_t y;
+		uint16_t w;
+		uint16_t h;
+		union {
+			uint16_t colorId; //Caso static/semistatic, per animazioni a frame loop o immagini statiche/low pattern
+			uint16_t asyincId; //Caso dynamic, l'id va a una struttura user-defined che parla direttamente con il renderer
+		};
+		uint16_t memFlags; //Es. se fare batching, se custom writing
+	};
 }
